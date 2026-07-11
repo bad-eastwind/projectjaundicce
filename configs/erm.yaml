@@ -1,0 +1,9 @@
+# DG BASELINE: plain ERM on DINOv2+LoRA, our physics/causal modules OFF (reference point).
+defaults: dinov2.yaml
+model:
+  scin: false
+  bili_axis: false
+  disentangle: {enable: false}
+  causal: {illuminant_adv: false, melanin_adv: false, lambda_adv: 0.0}
+train:
+  dg: {method: erm}

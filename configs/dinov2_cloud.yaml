@@ -1,0 +1,7 @@
+# Cloud single-GPU hardware overlay. Same shared science config (dinov2.yaml) as HPC for
+# comparability; only throughput knobs differ. Launch: python -m jaundice.train.train --config ...
+defaults: dinov2.yaml
+train:
+  num_workers: 8
+  batch_size: 32
+  amp: true

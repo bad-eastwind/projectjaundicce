@@ -1,0 +1,5 @@
+# Smoke test for the melanin<->bilirubin disentanglement path (ConvNeXt, tiny, CPU).
+defaults: smoke.yaml
+model:
+  disentangle: {enable: true, w_ortho: 0.1, w_decorr: 0.1}
+  mixstyle: {enable: true, p: 0.5, alpha: 0.1}

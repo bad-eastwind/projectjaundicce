@@ -1,0 +1,44 @@
+# Base config. Real training runs on Cloud GPU / HPC. Override via CLI or smoke.yaml.
+seed: 42
+
+data:
+  # ROOT-ONLY. dataset3==dataset4 (identical); use dataset3 as the single neonatal-skin source.
+  neo_skin_core: /Users/anweshkabiraj/Desktop/projectjaundice/jaundicedataset3
+  external_neonatal: null   # TODO: user-supplied external hospital neonatal set (later -> real cross-dataset LOCO)
+  manifest_out: data/manifest.csv
+  image_size: 384
+  split: {train: 0.70, val: 0.15, test: 0.15}
+  # LOCO generalization protocol
+  split_mode: random          # random | leave_domain_out
+  domain:
+    method: kmeans            # discover pseudo-domains within dataset3 (illuminant/skin-tone/acquisition)
+    k: 3
+    holdout: 0               # which discovered domain index to leave out for test (leave_domain_out)
+
+train:
+  device: auto        # auto -> cuda | mps | cpu
+  epochs: 60
+  batch_size: 32
+  lr: 3.0e-4
+  weight_decay: 0.05
+  num_workers: 8
+  amp: true
+  # domain-generalization classification objective: erm | irm | groupdro
+  dg: {method: erm, lambda: 100.0, eta: 0.01, anneal_steps: 500}
+
+model:
+  backbone: convnext_tiny   # BASELINE. DINOv2+LoRA lives in configs/dinov2.yaml
+  pretrained: true
+  scin: true                # Self-Calibrating Illuminant Normalization (physics, core novelty)
+  skin_mil: true            # weakly-supervised skin attention / MIL
+  bili_axis: true           # physics bilirubin-absorption head (core novelty)
+  causal: {illuminant_adv: true, melanin_adv: true, lambda_adv: 0.1}
+  lora: {enable: false, r: 8, alpha: 16, targets: [qkv, proj, fc1, fc2], dropout: 0.0}
+  # melanin<->bilirubin disentanglement (replaces plain BiliAxis when enabled; core novelty)
+  disentangle: {enable: false, w_ortho: 0.1, w_decorr: 0.1}
+  # MixStyle illuminant augmentation (DG); applied before SCIN, training only
+  mixstyle: {enable: false, p: 0.5, alpha: 0.1}
+
+eval:
+  cross_domain: true
+  skin_tone_strata: true    # ITA proxy fairness

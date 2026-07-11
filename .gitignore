@@ -1,0 +1,24 @@
+# Claude instructions
+CLAUDE.md
+
+# Private folders
+conversation/
+confidential/
+
+# Python virtual env
+.venv/
+
+# Python caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Derived / heavy
+experiments/
+data/manifest.csv
+jaundicedataset3/
+jaundicedataset4/
+
+# OS
+.DS_Store
