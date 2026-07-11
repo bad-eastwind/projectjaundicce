@@ -1,0 +1,7 @@
+# Kaggle overlay. Same science config as dinov2_cloud.yaml; only the dataset path differs
+# (Kaggle mounts uploaded datasets read-only under /kaggle/input/<dataset-slug>/...).
+# After uploading your dataset on Kaggle, verify the exact mounted path with `ls /kaggle/input/`
+# and edit neo_skin_core below if it doesn't match.
+defaults: dinov2_cloud.yaml
+data:
+  neo_skin_core: /kaggle/input/jaundicedataset3/jaundicedataset3
