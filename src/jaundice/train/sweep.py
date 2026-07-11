@@ -10,6 +10,8 @@ Examples:
   PYTHONPATH=src python -m jaundice.train.sweep --matrix ablation  --holdouts 1
   PYTHONPATH=src python -m jaundice.train.sweep --matrix all --dry-run
   PYTHONPATH=src python -m jaundice.train.sweep --matrix method --smoke --holdouts 1
+  # Kaggle/Cloud/HPC: override the dataset root for every run in the matrix (config files unchanged)
+  PYTHONPATH=src python -m jaundice.train.sweep --matrix all --data-root /kaggle/input/jaundicedataset3/jaundicedataset3
 """
 from __future__ import annotations
 import argparse, csv, traceback
@@ -52,8 +54,10 @@ def set_dotted(cfg: dict, key: str, val):
     o[parts[-1]] = val
 
 
-def make_cfg(config, overrides, holdout, dg, smoke):
+def make_cfg(config, overrides, holdout, dg, smoke, data_root=None):
     cfg = load_config(config)
+    if data_root:
+        set_dotted(cfg, "data.neo_skin_core", data_root)
     for k, v in (overrides or {}).items():
         set_dotted(cfg, k, v)
     apply_overrides(cfg, holdout=(None if holdout == "indist" else int(holdout)), dg=dg)
@@ -123,6 +127,8 @@ def main():
                     help="comma list of splits: 'indist' or domain ids")
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--data-root", default=None,
+                    help="override data.neo_skin_core for every run (e.g. Kaggle-mounted path)")
     args = ap.parse_args()
 
     holdouts = [h.strip() for h in args.holdouts.split(",") if h.strip()]
@@ -142,7 +148,8 @@ def main():
         tag = f"{r['group']}-{r['name']}-{r['split']}"
         print(f"\n===== [{i+1}/{len(runs)}] {tag} =====")
         try:
-            cfg = make_cfg(r["config"], r["overrides"], r["holdout"], r["dg"], args.smoke)
+            cfg = make_cfg(r["config"], r["overrides"], r["holdout"], r["dg"], args.smoke,
+                          data_root=args.data_root)
             res = run(cfg, tag=tag)
             rows.append({"group": r["group"], "name": r["name"], "split": r["split"],
                          **res["test"], "outdir": res["outdir"]})
