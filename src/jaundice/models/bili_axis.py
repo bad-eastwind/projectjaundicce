@@ -22,6 +22,10 @@ class BiliAxis(nn.Module):
         self.weight = nn.Parameter(torch.tensor([0.5, 0.5, -1.0]).view(1, 3, 1, 1))
         self.bias = nn.Parameter(torch.zeros(1))
         self.scale = nn.Parameter(torch.ones(1))
+        # physical prior direction (frozen) the learnable axis is anchored to, so gradient descent
+        # can refine the axis but not silently rotate "bilirubin" into whatever separates the classes
+        # (e.g. residual lighting) — which would make the physics/interpretability claim decorative.
+        self.register_buffer("weight_init", self.weight.detach().flatten().clone())
 
     def forward(self, x_wb: torch.Tensor, weight: torch.Tensor):
         # x_wb [B,3,H,W] white-balanced [0,1]; weight [B,H,W] skin-attention (>=0)
@@ -32,4 +36,5 @@ class BiliAxis(nn.Module):
         var = (((idx - mean.view(-1, 1, 1)) ** 2) * w).sum(dim=(1, 2)) / denom
         std = var.clamp_min(1e-8).sqrt()
         feat = torch.stack([mean, std], dim=1)                          # [B,2]
-        return feat, idx
+        anchor = 1.0 - torch.cosine_similarity(self.weight.flatten(), self.weight_init, dim=0)
+        return feat, idx, anchor

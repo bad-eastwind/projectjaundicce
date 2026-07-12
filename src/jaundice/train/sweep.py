@@ -27,6 +27,7 @@ METHODS = {
     "irm":      ("configs/irm.yaml", "irm"),
     "groupdro": ("configs/groupdro.yaml", "groupdro"),
     "ours":     ("configs/disentangle.yaml", None),
+    "ours_bg":  ("configs/bili_grad.yaml", None),   # + cephalocaudal differential bilirubin field
 }
 
 # ablations: base = ours (disentangle.yaml), toggle ONE component off

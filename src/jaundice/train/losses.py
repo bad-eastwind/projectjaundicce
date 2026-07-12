@@ -30,6 +30,14 @@ def aux_losses(aux: dict, cfg: dict):
         total = total + lm
         logs["adv_mela"] = float(lm.item())
 
+    # anchor the learnable physics axis (BiliAxis or disentangle) near its physical prior direction
+    anchor = aux.get("axis_anchor")
+    if anchor is not None:
+        w_anchor = float(mcfg.get("physics_anchor", 0.0))
+        if w_anchor > 0:
+            total = total + w_anchor * anchor
+            logs["axis_anchor"] = float(anchor.item())
+
     if dis.get("enable"):
         if aux.get("ortho") is not None:
             total = total + dis.get("w_ortho", 0.1) * aux["ortho"]

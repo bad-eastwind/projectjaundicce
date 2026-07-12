@@ -27,14 +27,30 @@ def load_config(path: str | os.PathLike) -> dict:
     return cfg
 
 
-def seed_everything(seed: int) -> None:
+def seed_everything(seed: int, deterministic: bool = True) -> None:
     random.seed(seed); os.environ["PYTHONHASHSEED"] = str(seed)
     try:
         import numpy as np; np.random.seed(seed)
     except ImportError:
         pass
     try:
-        import torch; torch.manual_seed(seed)
+        import torch
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)          # no-op if cuda absent; seeds all GPUs otherwise
+        if deterministic:
+            torch.backends.cudnn.deterministic = True
+            torch.backends.cudnn.benchmark = False
+    except ImportError:
+        pass
+
+
+def seed_worker(worker_id: int) -> None:
+    """DataLoader worker seeding so per-worker augmentation RNG is reproducible across runs."""
+    import torch
+    base = torch.initial_seed() % 2 ** 32
+    random.seed(base + worker_id)
+    try:
+        import numpy as np; np.random.seed((base + worker_id) % 2 ** 32)
     except ImportError:
         pass
 

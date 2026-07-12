@@ -17,7 +17,7 @@ import torch.nn as nn
 
 
 class SCIN(nn.Module):
-    def __init__(self, eps: float = 1e-4, neutral_mass_scale: float = 64.0):
+    def __init__(self, eps: float = 1e-4, neutral_frac_scale: float = 0.02):
         super().__init__()
         # learnable soft-selection of neutral (bright, low-saturation) reference pixels
         self.bright_thresh = nn.Parameter(torch.tensor(0.60))
@@ -25,10 +25,14 @@ class SCIN(nn.Module):
         self.bright_sharp = nn.Parameter(torch.tensor(10.0))
         self.sat_sharp = nn.Parameter(torch.tensor(10.0))
         self.eps = eps
-        # controls how much selected-mass is needed before trusting the neutral estimate over gray-world
-        self.neutral_mass_scale = neutral_mass_scale
+        # neutral COVERAGE FRACTION (of image area) needed before trusting the neutral estimate
+        # over gray-world. Resolution-independent: an absolute mass threshold would saturate at high
+        # resolution (any neutral surface -> mass >> const -> gray-world fallback becomes dead code)
+        # and behave differently at smoke resolution.
+        self.neutral_frac_scale = neutral_frac_scale
 
     def estimate_illuminant(self, x: torch.Tensor) -> torch.Tensor:
+        npix = x.shape[-1] * x.shape[-2]              # H*W
         maxc = x.amax(1)                              # [B,H,W] brightness (max channel)
         minc = x.amin(1)
         sat = (maxc - minc) / (maxc + self.eps)       # HSV-like saturation
@@ -39,8 +43,9 @@ class SCIN(nn.Module):
         mass = w.sum(dim=(2, 3))                       # [B,1]
         neutral_illum = num / (mass + self.eps)       # mean color of neutral refs
         gray_world = x.mean(dim=(2, 3))               # fallback if no neutral refs found
-        # trust the neutral estimate proportional to how much neutral mass was found
-        alpha = torch.clamp(mass / self.neutral_mass_scale, 0.0, 1.0)   # [B,1]
+        # trust the neutral estimate proportional to the FRACTION of image area selected as neutral
+        frac = mass / npix                             # [B,1] in [0,1], resolution-independent
+        alpha = torch.clamp(frac / self.neutral_frac_scale, 0.0, 1.0)   # [B,1]
         illum = alpha * neutral_illum + (1.0 - alpha) * gray_world
         illum = illum / (illum.mean(dim=1, keepdim=True) + self.eps)    # unit-mean -> preserve brightness
         return illum.clamp_min(self.eps)

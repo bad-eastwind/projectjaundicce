@@ -1,0 +1,5 @@
+# Full method + BiliGrad: cephalocaudal differential bilirubin field on DINOv2+LoRA + SCIN + causal.
+# BiliGrad replaces the plain disentangle head with the confounder-cancelling spatial-progression readout.
+defaults: dinov2.yaml
+model:
+  bili_grad: {enable: true, regress_melanin: true}

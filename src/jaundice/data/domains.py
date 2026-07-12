@@ -83,9 +83,18 @@ def main():
     core = [r for r in rows if r["dataset_id"] == "neo_skin_core"]
     print(f"computing descriptors for {len(core)} core images ...")
     feats = np.array([descriptor(r["path"]) for r in core])
-    Z = StandardScaler().fit_transform(feats)
-    km = KMeans(n_clusters=k, random_state=cfg["seed"], n_init=10).fit(Z)
-    labels = km.labels_
+
+    # FIT the scaler + KMeans on the TRAIN split only, then PREDICT for every core image. Fitting on
+    # all rows lets cluster boundaries (the pseudo-domain definition) see val/test statistics -> a
+    # subtle leak. `split` is the deterministic stratified split written by manifest.py.
+    is_train = np.array([r.get("split") == "train" for r in core])
+    if is_train.sum() < k:
+        print(f"[warn] <{k} train rows; fitting domains on all core rows")
+        is_train = np.ones(len(core), bool)
+    scaler = StandardScaler().fit(feats[is_train])
+    Z = scaler.transform(feats)
+    km = KMeans(n_clusters=k, random_state=cfg["seed"], n_init=10).fit(Z[is_train])
+    labels = km.predict(Z)
 
     for r in rows:
         r.setdefault("domain", "")
@@ -95,12 +104,22 @@ def main():
     with open(manifest, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields); w.writeheader(); w.writerows(rows)
 
-    print(f"wrote domain column (k={k}) to {manifest}\n")
-    print(f"{'domain':<8}{'n':>5}{'jaundice':>10}{'normal':>8}")
+    print(f"wrote domain column (k={k}, fit on {int(is_train.sum())} train rows) to {manifest}\n")
+    print(f"{'domain':<8}{'n':>5}{'jaundice':>10}{'normal':>8}{'pos_rate':>10}")
+    pos_rates = []
     for c in range(k):
         idx = labels == c
+        n = int(idx.sum())
         j = sum(int(core[i]["label"]) for i in np.where(idx)[0])
-        print(f"{c:<8}{int(idx.sum()):>5}{j:>10}{int(idx.sum())-j:>8}")
+        pr = j / max(n, 1)
+        pos_rates.append(pr)
+        print(f"{c:<8}{n:>5}{j:>10}{n-j:>8}{pr:>10.2f}")
+    # label-shift diagnostic: if positive-rate varies a lot across domains, leave-one-domain-out
+    # partly measures LABEL shift, not domain shift. Reviewers will probe this — report it honestly.
+    if pos_rates:
+        spread = max(pos_rates) - min(pos_rates)
+        flag = "  <-- HIGH: LOCO here conflates label shift with domain shift" if spread > 0.2 else ""
+        print(f"\n[label-shift] positive-rate spread across domains = {spread:.2f}{flag}")
 
 
 if __name__ == "__main__":

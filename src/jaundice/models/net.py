@@ -11,6 +11,7 @@ from .backbone import Backbone
 from .scin import SCIN
 from .bili_axis import BiliAxis
 from .disentangle import MelaninBilirubinDisentangle
+from .bili_grad import CephalocaudalBiliField
 from .mixstyle import MixStyleIlluminant
 from .causal import AdversaryHead, grad_reverse, compute_ita
 
@@ -38,7 +39,7 @@ class JaundiceNet(nn.Module):
                  num_classes: int = 2, pretrained: bool = False,
                  bili_axis: bool = True, causal: dict | None = None,
                  lora: dict | None = None, disentangle: dict | None = None,
-                 mixstyle: dict | None = None):
+                 mixstyle: dict | None = None, bili_grad: dict | None = None):
         super().__init__()
         self.mixstyle = (MixStyleIlluminant(p=mixstyle.get("p", 0.5), alpha=mixstyle.get("alpha", 0.1))
                          if (mixstyle and mixstyle.get("enable")) else None)
@@ -49,11 +50,15 @@ class JaundiceNet(nn.Module):
         dim = self.backbone.num_features
         self.pool = GatedAttentionPool(dim)
 
-        # physics color feature: disentangle (melanin+bilirubin) takes precedence over plain BiliAxis
-        self.dis = MelaninBilirubinDisentangle() if (disentangle and disentangle.get("enable")) else None
-        self.bili = BiliAxis() if (bili_axis and self.dis is None) else None
-        phys_dim = (MelaninBilirubinDisentangle.OUT_DIM if self.dis is not None
-                    else (BiliAxis.OUT_DIM if self.bili is not None else 0))
+        # physics color feature. Precedence: BiliGrad (differential, novel) > disentangle > BiliAxis.
+        self.grad = (CephalocaudalBiliField(regress_melanin=bili_grad.get("regress_melanin", True))
+                     if (bili_grad and bili_grad.get("enable")) else None)
+        self.dis = (MelaninBilirubinDisentangle()
+                    if (self.grad is None and disentangle and disentangle.get("enable")) else None)
+        self.bili = BiliAxis() if (bili_axis and self.grad is None and self.dis is None) else None
+        phys_dim = (CephalocaudalBiliField.OUT_DIM if self.grad is not None
+                    else MelaninBilirubinDisentangle.OUT_DIM if self.dis is not None
+                    else BiliAxis.OUT_DIM if self.bili is not None else 0)
         self.head = nn.Linear(dim + phys_dim, num_classes)
 
         causal = causal or {}
@@ -79,13 +84,17 @@ class JaundiceNet(nn.Module):
 
         attn_up = F.interpolate(attn_map.unsqueeze(1), size=(H, W),
                                 mode="bilinear", align_corners=False).squeeze(1)
-        bili_map = m_scalar = ortho = phys_bili = None
-        if self.dis is not None:
-            b_feat, m_scalar, bili_map, ortho = self.dis(x_wb, attn_up)
+        bili_map = m_scalar = ortho = phys_bili = axis_anchor = s_map = None
+        if self.grad is not None:
+            b_feat, bili_map, s_map, axis_anchor = self.grad(x_wb, attn_up)
+            emb = torch.cat([pooled, b_feat], dim=1)
+            phys_bili = b_feat[:, :1]                  # beta = cephalocaudal bilirubin slope
+        elif self.dis is not None:
+            b_feat, m_scalar, bili_map, ortho, axis_anchor = self.dis(x_wb, attn_up)
             emb = torch.cat([pooled, b_feat], dim=1)
             phys_bili = b_feat[:, :1]
         elif self.bili is not None:
-            b_feat, bili_map = self.bili(x_wb, attn_up)
+            b_feat, bili_map, axis_anchor = self.bili(x_wb, attn_up)
             emb = torch.cat([pooled, b_feat], dim=1)
             phys_bili = b_feat[:, :1]
         else:
@@ -95,11 +104,14 @@ class JaundiceNet(nn.Module):
         if not return_aux:
             return logits
 
-        aux = {"illum": illum, "attn": attn_map, "bili_map": bili_map,
-               "ortho": ortho, "phys_bili": phys_bili, "melanin": m_scalar, "embedding": emb}
+        aux = {"illum": illum, "attn": attn_map, "bili_map": bili_map, "x_wb": x_wb,
+               "ortho": ortho, "axis_anchor": axis_anchor, "phys_bili": phys_bili,
+               "melanin": m_scalar, "s_map": s_map, "embedding": emb}
         if self.adv_illum is not None and illum is not None:
             aux["adv_illum_pred"] = self.adv_illum(grad_reverse(pooled, self.lambda_adv))
-            aux["illum_target"] = illum.detach()
+            # target = log-chromaticity of the estimated illuminant (illum is unit-mean, so log has
+            # mean~0 and captures the colour cast in a better-conditioned space than raw ratios).
+            aux["illum_target"] = torch.log(illum.clamp_min(1e-4)).detach()
         if self.adv_mela is not None:
             aux["adv_mela_pred"] = self.adv_mela(grad_reverse(pooled, self.lambda_adv))
             # nuisance target = disentangled melanin factor if available, else ITA proxy

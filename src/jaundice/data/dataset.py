@@ -10,7 +10,7 @@ import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
 import torchvision.transforms.v2 as T
 
-from jaundice.utils import stable_bucket
+from jaundice.utils import stable_bucket, seed_worker, pick_device
 
 
 def read_manifest(path: str, dataset_id: str = "neo_skin_core") -> list[dict]:
@@ -103,17 +103,31 @@ def build_loaders(cfg: dict, smoke: bool = False) -> dict:
         cap = cfg.get("smoke", {}).get("max_per_class", 8)
         by_split = {s: _cap_per_class(v, cap) for s, v in by_split.items()}
 
+    nw = t["num_workers"]
+    pin = pick_device(t.get("device", "auto")) == "cuda"
+    gen = torch.Generator().manual_seed(int(cfg.get("seed", 0)))
+    dl_common = dict(num_workers=nw, pin_memory=pin,
+                     worker_init_fn=(seed_worker if nw > 0 else None),
+                     persistent_workers=(nw > 0))
+    if nw > 0:
+        dl_common["prefetch_factor"] = 4
+
     loaders = {}
     for s in ("train", "val", "test"):
         ds = JaundiceDataset(by_split[s], size, train=(s == "train"))
         if s == "train":
             sampler = _balanced_sampler([r["label"] for r in by_split[s]])
             loaders[s] = DataLoader(ds, batch_size=t["batch_size"], sampler=sampler,
-                                    num_workers=t["num_workers"], drop_last=False)
+                                    drop_last=False, generator=gen, **dl_common)
         else:
-            loaders[s] = DataLoader(ds, batch_size=t["batch_size"], shuffle=False,
-                                    num_workers=t["num_workers"])
+            loaders[s] = DataLoader(ds, batch_size=t["batch_size"], shuffle=False, **dl_common)
         print(f"[loader] {s}: {len(ds)} imgs "
               f"(jaundice={sum(r['label'] for r in by_split[s])}, "
               f"normal={sum(1-r['label'] for r in by_split[s])})")
+
+    # unaugmented, unsampled pass over the train split: full unique set with EVAL transforms.
+    # Used for the retrieval bank / any feature extraction, where the WeightedRandomSampler
+    # (replacement) train loader would give a duplicated, ~37%-missing, randomly-cropped set.
+    ds_eval = JaundiceDataset(by_split["train"], size, train=False)
+    loaders["train_eval"] = DataLoader(ds_eval, batch_size=t["batch_size"], shuffle=False, **dl_common)
     return loaders

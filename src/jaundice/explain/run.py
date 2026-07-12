@@ -21,7 +21,7 @@ def build_model(cfg, dev, ckpt=None, is_smoke=False):
     model = JaundiceNet(backbone=m["backbone"], scin=m["scin"], pretrained=pretrained,
                         bili_axis=m.get("bili_axis", True), causal=m.get("causal", {}),
                         lora=m.get("lora", {}), disentangle=m.get("disentangle", {}),
-                        mixstyle=m.get("mixstyle", {})).to(dev)
+                        mixstyle=m.get("mixstyle", {}), bili_grad=m.get("bili_grad", {})).to(dev)
     if ckpt:
         state = torch.load(ckpt, map_location=dev, weights_only=True)["model"]
         model.load_state_dict(state)
@@ -46,7 +46,8 @@ def main():
     loaders = build_loaders(cfg, smoke=is_smoke)
 
     model = build_model(cfg, dev, ckpt=args.ckpt, is_smoke=is_smoke)
-    bank = RetrievalBank.build(model, loaders["train"], dev)
+    # full unique train set, EVAL transforms, no resampling (loaders["train"] is augmented+resampled)
+    bank = RetrievalBank.build(model, loaders["train_eval"], dev)
     print(f"bank: {bank.emb.shape[0]} exemplars, dim={bank.emb.shape[1]}")
 
     outdir = Path("experiments") / f"{args.tag}-{time.strftime('%Y%m%d-%H%M%S')}"

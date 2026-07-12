@@ -22,6 +22,7 @@ class DGObjective:
         self.anneal_steps = anneal_steps
         self.step = 0
         self.q = torch.ones(self.num_groups) / self.num_groups   # GroupDRO group weights
+        self.seen: set[int] = set()   # group ids actually observed in training (LOCO holds some out)
 
     @staticmethod
     def _irm_penalty(logits, y):
@@ -53,10 +54,15 @@ class DGObjective:
             for gd in groups:
                 m = domain == gd
                 losses.append(F.cross_entropy(logits[m], y[m])); idxs.append(int(gd))
+            self.seen.update(idxs)
+            seen = sorted(self.seen)
             with torch.no_grad():
                 for l, gi in zip(losses, idxs):
                     self.q[gi] = self.q[gi] * torch.exp(self.eta * l.detach())
-                self.q = self.q / self.q.sum()
+                # renormalize ONLY over groups actually seen in training. Under LOCO a held-out
+                # domain never appears; keeping its stale 1/num_groups in the denominator would
+                # pollute the present-domain weights.
+                self.q[seen] = self.q[seen] / self.q[seen].sum()
             loss = sum(self.q[gi] * l for l, gi in zip(losses, idxs))
             return loss, {"worst_group": float(max(l.item() for l in losses))}
 

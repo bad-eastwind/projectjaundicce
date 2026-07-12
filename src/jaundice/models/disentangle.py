@@ -35,6 +35,11 @@ class MelaninBilirubinDisentangle(nn.Module):
         self.mela_b = nn.Parameter(torch.zeros(1))
         self.bili_s = nn.Parameter(torch.ones(1))
         self.mela_s = nn.Parameter(torch.ones(1))
+        # frozen physical priors to anchor the learnable axes to (see BiliAxis rationale): keeps the
+        # bilirubin axis near +b* and the melanin axis near (-L*,+a*) instead of drifting into the
+        # class-separating (possibly lighting) direction.
+        self.register_buffer("bili_init", self.bili_dir.detach().clone())
+        self.register_buffer("mela_init", self.mela_dir.detach().clone())
 
     def forward(self, x_wb: torch.Tensor, weight: torch.Tensor):
         L, a, b = rgb_to_lab(x_wb)
@@ -50,4 +55,6 @@ class MelaninBilirubinDisentangle(nn.Module):
         m_scalar = ((m_map * w).sum(dim=(1, 2)) / denom).unsqueeze(1)           # [B,1]
 
         ortho = torch.cosine_similarity(self.bili_dir, self.mela_dir, dim=0).abs()
-        return b_feat, m_scalar, b_map, ortho
+        anchor = ((1.0 - torch.cosine_similarity(self.bili_dir, self.bili_init, dim=0))
+                  + (1.0 - torch.cosine_similarity(self.mela_dir, self.mela_init, dim=0)))
+        return b_feat, m_scalar, b_map, ortho, anchor
