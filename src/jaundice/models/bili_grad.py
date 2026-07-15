@@ -84,14 +84,18 @@ class CephalocaudalBiliField(nn.Module):
     @staticmethod
     def _wls_ss(phi, y, w, ridge):
         """Weighted least squares. Returns weighted residual sum-of-squares and coefficients."""
-        wphi = phi * w.unsqueeze(2)
-        A = torch.einsum("bnk,bnj->bkj", wphi, phi) + ridge * torch.eye(
-            phi.shape[2], device=phi.device).unsqueeze(0)
-        rhs = torch.einsum("bnk,bn->bk", wphi, y)
-        coeff = torch.linalg.solve(A, rhs.unsqueeze(2)).squeeze(2)
-        resid = y - torch.einsum("bnk,bk->bn", phi, coeff)
-        ss = ((resid ** 2) * w).sum(1)
-        return ss, coeff
+        # Autocast recasts einsum/solve inputs to fp16/bf16 per-op regardless of tensor dtype,
+        # and linalg.solve needs matching fp32 dtypes, so run the whole solve outside autocast.
+        with torch.autocast(device_type=phi.device.type, enabled=False):
+            phi32, y32, w32 = phi.float(), y.float(), w.float()
+            wphi = phi32 * w32.unsqueeze(2)
+            A = torch.einsum("bnk,bnj->bkj", wphi, phi32) + ridge * torch.eye(
+                phi32.shape[2], device=phi32.device).unsqueeze(0)
+            rhs = torch.einsum("bnk,bn->bk", wphi, y32)
+            coeff = torch.linalg.solve(A, rhs.unsqueeze(2)).squeeze(2)
+            resid = y32 - torch.einsum("bnk,bk->bn", phi32, coeff)
+            ss = ((resid ** 2) * w32).sum(1)
+        return ss.to(phi.dtype), coeff.to(phi.dtype)
 
     def forward(self, x_wb: torch.Tensor, weight: torch.Tensor, head_anchor: torch.Tensor | None = None):
         B, _, H, W = x_wb.shape
