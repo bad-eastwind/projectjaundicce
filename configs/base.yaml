@@ -23,6 +23,7 @@ train:
   weight_decay: 0.05
   num_workers: 8
   amp: true
+  patience: 15        # early stop if val AUC doesn't improve for N epochs (0 = off). Best-by-val saved.
   # domain-generalization classification objective: erm | irm | groupdro
   dg: {method: erm, lambda: 100.0, eta: 0.01, anneal_steps: 500}
   # test operating point tuned on val (AUC stays threshold-free); screening = recall-first

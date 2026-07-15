@@ -94,7 +94,8 @@ def run(cfg: dict, tag: str = "run") -> dict:
     outdir = Path("experiments") / f"{tag}-{time.strftime('%Y%m%d-%H%M%S')}"
     outdir.mkdir(parents=True, exist_ok=True)
 
-    best, hist = -1.0, []
+    patience = int(t.get("patience", 0) or 0)   # 0 = off; else stop if val doesn't improve for N epochs
+    best, hist, since_improve = -1.0, [], 0
     for epoch in range(t["epochs"]):
         model.train()
         run, nb = 0.0, 0
@@ -132,8 +133,14 @@ def run(cfg: dict, tag: str = "run") -> dict:
               f"val_auc={vm.get('auc',float('nan')):.3f}")
         if score > best:
             best = score
+            since_improve = 0
             torch.save({"model": model.state_dict(), "cfg": cfg, "val": vm, "epoch": epoch},
                        outdir / "best.pt")
+        else:
+            since_improve += 1
+        if patience and since_improve >= patience:
+            print(f"early stop at epoch {epoch} (no val improvement for {patience} epochs)")
+            break
 
     # --- final test evaluation: threshold-free + val-tuned operating points + fairness ---
     thr_cfg = t.get("threshold", {}) or {}

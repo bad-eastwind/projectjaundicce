@@ -93,7 +93,7 @@ def fmt(r, k):
 
 
 def write_results(rows, outdir):
-    keys = ["group", "name", "split", "balanced_acc", "auc", "sensitivity",
+    keys = ["group", "name", "split", "seed", "balanced_acc", "auc", "sensitivity",
             "specificity", "f1", "acc", "error", "outdir"]
     with open(outdir / "results.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=keys); w.writeheader()
@@ -130,11 +130,16 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--data-root", default=None,
                     help="override data.neo_skin_core for every run (e.g. Kaggle-mounted path)")
+    ap.add_argument("--seeds", default=None,
+                    help="comma list of seeds to repeat every run under (error bars); default=config seed")
     args = ap.parse_args()
 
     holdouts = [h.strip() for h in args.holdouts.split(",") if h.strip()]
+    seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else [None]
     runs = build_matrix(args.matrix, holdouts)
-    print(f"matrix={args.matrix} | {len(runs)} runs | holdouts={holdouts}")
+    total = len(runs) * len(seeds)
+    print(f"matrix={args.matrix} | {len(runs)} configs x {len(seeds)} seed(s) = {total} runs | "
+          f"holdouts={holdouts} | seeds={seeds}")
 
     if args.dry_run:
         for r in runs:
@@ -145,19 +150,26 @@ def main():
     outdir = Path("experiments") / f"sweep-{time.strftime('%Y%m%d-%H%M%S')}"
     outdir.mkdir(parents=True, exist_ok=True)
     rows = []
-    for i, r in enumerate(runs):
-        tag = f"{r['group']}-{r['name']}-{r['split']}"
-        print(f"\n===== [{i+1}/{len(runs)}] {tag} =====")
-        try:
-            cfg = make_cfg(r["config"], r["overrides"], r["holdout"], r["dg"], args.smoke,
-                          data_root=args.data_root)
-            res = run(cfg, tag=tag)
-            rows.append({"group": r["group"], "name": r["name"], "split": r["split"],
-                         **res["test"], "outdir": res["outdir"]})
-        except Exception as e:  # keep sweeping even if one run fails
-            traceback.print_exc()
-            rows.append({"group": r["group"], "name": r["name"], "split": r["split"], "error": str(e)})
-        write_results(rows, outdir)   # incremental -> partial results survive a crash
+    i = 0
+    for r in runs:
+        for sd in seeds:
+            i += 1
+            tag = f"{r['group']}-{r['name']}-{r['split']}" + (f"-s{sd}" if sd is not None else "")
+            print(f"\n===== [{i}/{total}] {tag} =====")
+            try:
+                cfg = make_cfg(r["config"], r["overrides"], r["holdout"], r["dg"], args.smoke,
+                              data_root=args.data_root)
+                if sd is not None:
+                    cfg["seed"] = sd
+                res = run(cfg, tag=tag)
+                rows.append({"group": r["group"], "name": r["name"], "split": r["split"],
+                             "seed": (sd if sd is not None else cfg.get("seed")),
+                             **res["test"], "outdir": res["outdir"]})
+            except Exception as e:  # keep sweeping even if one run fails
+                traceback.print_exc()
+                rows.append({"group": r["group"], "name": r["name"], "split": r["split"],
+                             "seed": sd, "error": str(e)})
+            write_results(rows, outdir)   # incremental -> partial results survive a crash
 
     print(f"\nsweep done -> {outdir}/results.md")
 

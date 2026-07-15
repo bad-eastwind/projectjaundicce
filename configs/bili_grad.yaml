@@ -3,3 +3,4 @@
 defaults: dinov2.yaml
 model:
   bili_grad: {enable: true, regress_melanin: true}
+  mixstyle: {enable: true, p: 0.5, alpha: 0.1}   # complete the DG stack (train-only illuminant aug)

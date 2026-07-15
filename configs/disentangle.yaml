@@ -2,3 +2,4 @@
 defaults: dinov2.yaml
 model:
   disentangle: {enable: true, w_ortho: 0.1, w_decorr: 0.1}
+  mixstyle: {enable: true, p: 0.5, alpha: 0.1}   # complete the DG stack (train-only illuminant aug)
