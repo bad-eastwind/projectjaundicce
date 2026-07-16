@@ -1,0 +1,3 @@
+data:
+  neo_skin_core: /kaggle/input/datasets/aiolapo/jaundice-image-data
+defaults: dinov2_cloud.yaml

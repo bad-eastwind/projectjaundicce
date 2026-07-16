@@ -1,0 +1,5 @@
+group,name,split,balanced_acc,auc,sensitivity,specificity,f1,acc,error,outdir
+method,erm,indist,0.5,0.3055555555555555,1.0,0.0,0.6666666666666666,0.5,,experiments/method-erm-indist-20260711-152658
+method,irm,indist,0.5,0.3055555555555556,1.0,0.0,0.6666666666666666,0.5,,experiments/method-irm-indist-20260711-152702
+method,groupdro,indist,0.5833333333333334,0.41666666666666674,0.8333333333333334,0.3333333333333333,0.6666666666666666,0.5833333333333334,,experiments/method-groupdro-indist-20260711-152705
+method,ours,indist,0.5,0.6111111111111112,0.0,1.0,0.0,0.5,,experiments/method-ours-indist-20260711-152709

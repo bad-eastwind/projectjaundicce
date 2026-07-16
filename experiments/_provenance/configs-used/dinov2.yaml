@@ -1,0 +1,9 @@
+# DINOv2 (ViT-S/14) foundation backbone + LoRA (PEFT). Physics (SCIN/BiliAxis) + causal stay ON.
+# Frozen backbone -> only LoRA adapters + physics/causal/pool/head train (right regime for 760 imgs).
+defaults: base.yaml
+data:
+  image_size: 392            # multiple of 14 (patch14) -> 28x28 tokens
+model:
+  backbone: vit_small_patch14_dinov2
+  pretrained: true
+  lora: {enable: true, r: 8, alpha: 16, targets: [qkv, proj, fc1, fc2], dropout: 0.05}

@@ -1,0 +1,5 @@
+# LOCO cross-domain training config (full/HPC). Sweep holdout via --holdout 0|1|2.
+defaults: base.yaml
+data:
+  split_mode: leave_domain_out
+  domain: {method: kmeans, k: 3, holdout: 0}

@@ -1,0 +1,5 @@
+# Smoke test for the leave-one-domain-out (LOCO) path. Requires domains.py to have run first.
+defaults: smoke.yaml
+data:
+  split_mode: leave_domain_out
+  domain: {method: kmeans, k: 3, holdout: 0}

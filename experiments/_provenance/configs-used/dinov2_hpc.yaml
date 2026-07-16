@@ -1,0 +1,7 @@
+# HPC hardware overlay. Science config (dinov2.yaml) is SHARED with cloud so runs stay comparable;
+# only throughput knobs differ here. Launch via scripts/train.sbatch.
+defaults: dinov2.yaml
+train:
+  num_workers: 16
+  batch_size: 64
+  amp: true

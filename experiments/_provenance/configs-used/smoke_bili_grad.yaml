@@ -1,0 +1,5 @@
+# Smoke test for the BiliGrad differential bilirubin field (ConvNeXt, tiny, CPU).
+defaults: smoke.yaml
+model:
+  bili_grad: {enable: true, regress_melanin: true}
+  mixstyle: {enable: true, p: 0.5, alpha: 0.1}

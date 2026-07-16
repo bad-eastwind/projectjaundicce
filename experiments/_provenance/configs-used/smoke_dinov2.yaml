@@ -1,0 +1,7 @@
+# Smoke test for DINOv2+LoRA path (random weights locally; pretrained forced off in smoke).
+defaults: smoke.yaml
+data:
+  image_size: 70             # 5*14, clean for patch14
+model:
+  backbone: vit_small_patch14_dinov2
+  lora: {enable: true, r: 4, alpha: 8, targets: [qkv, proj, fc1, fc2], dropout: 0.0}

@@ -1,0 +1,9 @@
+# DG BASELINE: IRM on DINOv2+LoRA, our physics/causal modules OFF (isolates the DG-method effect).
+defaults: dinov2.yaml
+model:
+  scin: false
+  bili_axis: false
+  disentangle: {enable: false}
+  causal: {illuminant_adv: false, melanin_adv: false, lambda_adv: 0.0}
+train:
+  dg: {method: irm, lambda: 100.0, eta: 0.01, anneal_steps: 500}

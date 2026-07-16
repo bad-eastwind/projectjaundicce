@@ -15,7 +15,8 @@ __pycache__/
 .pytest_cache/
 
 # Derived / heavy
-experiments/
+experiments/smoke_*/
+experiments/smoke-*/
 data/manifest.csv
 jaundicedataset3/
 jaundicedataset4/

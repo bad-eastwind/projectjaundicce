@@ -1,0 +1,34 @@
+{
+  "n": 8,
+  "ckpt": null,
+  "results": {
+    "ours": {
+      "illuminant": {
+        "pred_swing": 0.020485348999500275,
+        "flip_rate": 0.0625,
+        "beta_cov": 0.14194941520690918,
+        "raw_bstar_swing": 11.277737617492676
+      },
+      "melanin": {
+        "pred_swing": 0.04364035278558731,
+        "flip_rate": 0.1,
+        "beta_cov": 0.2394465208053589,
+        "raw_bstar_swing": 1.4373443126678467
+      }
+    },
+    "baseline": {
+      "illuminant": {
+        "pred_swing": 0.03047378920018673,
+        "flip_rate": 0.0,
+        "beta_cov": 0.7710940837860107,
+        "raw_bstar_swing": 11.277737617492676
+      },
+      "melanin": {
+        "pred_swing": 0.12343788146972656,
+        "flip_rate": 0.225,
+        "beta_cov": 0.35190555453300476,
+        "raw_bstar_swing": 1.4373443126678467
+      }
+    }
+  }
+}

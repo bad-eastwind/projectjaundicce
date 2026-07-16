@@ -1,0 +1,34 @@
+{
+  "n": 64,
+  "ckpt": "experiments/ourbg_indist-20260715-173549/best.pt",
+  "results": {
+    "ours": {
+      "illuminant": {
+        "pred_swing": 0.013204026035964489,
+        "flip_rate": 0.013020833333333334,
+        "beta_cov": 0.19767224788665771,
+        "raw_bstar_swing": 12.489646911621094
+      },
+      "melanin": {
+        "pred_swing": 0.08719794452190399,
+        "flip_rate": 0.075,
+        "beta_cov": 0.3619005084037781,
+        "raw_bstar_swing": 1.709005355834961
+      }
+    },
+    "baseline": {
+      "illuminant": {
+        "pred_swing": 0.07267331331968307,
+        "flip_rate": 0.07552083333333333,
+        "beta_cov": NaN,
+        "raw_bstar_swing": 12.489646911621094
+      },
+      "melanin": {
+        "pred_swing": 0.08165832608938217,
+        "flip_rate": 0.06875,
+        "beta_cov": NaN,
+        "raw_bstar_swing": 1.709005355834961
+      }
+    }
+  }
+}

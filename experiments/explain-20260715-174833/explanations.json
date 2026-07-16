@@ -1,0 +1,682 @@
+[
+  {
+    "query": "jaundice (1).jpg",
+    "true_label": 1,
+    "retrieval_prob": 0.0,
+    "classifier_prob": 0.073,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "normal (875).jpg",
+        "label": 0,
+        "sim": 0.623
+      },
+      {
+        "path": "normal (716).jpg",
+        "label": 0,
+        "sim": 0.614
+      },
+      {
+        "path": "normal (878).jpg",
+        "label": 0,
+        "sim": 0.605
+      },
+      {
+        "path": "normal (1112).jpg",
+        "label": 0,
+        "sim": 0.598
+      },
+      {
+        "path": "normal (834).jpg",
+        "label": 0,
+        "sim": 0.585
+      }
+    ]
+  },
+  {
+    "query": "jaundice (100).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.999,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (101).jpg",
+        "label": 1,
+        "sim": 0.793
+      },
+      {
+        "path": "jaundice (108).jpg",
+        "label": 1,
+        "sim": 0.722
+      },
+      {
+        "path": "jaundice (153).jpg",
+        "label": 1,
+        "sim": 0.715
+      },
+      {
+        "path": "jaundice (35).jpg",
+        "label": 1,
+        "sim": 0.714
+      },
+      {
+        "path": "jaundice (166).jpg",
+        "label": 1,
+        "sim": 0.704
+      }
+    ]
+  },
+  {
+    "query": "jaundice (105).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.968,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (106).jpg",
+        "label": 1,
+        "sim": 0.66
+      },
+      {
+        "path": "jaundice (107).jpg",
+        "label": 1,
+        "sim": 0.632
+      },
+      {
+        "path": "jaundice (183).jpg",
+        "label": 1,
+        "sim": 0.632
+      },
+      {
+        "path": "jaundice (171).jpg",
+        "label": 1,
+        "sim": 0.574
+      },
+      {
+        "path": "jaundice (102).jpg",
+        "label": 1,
+        "sim": 0.573
+      }
+    ]
+  },
+  {
+    "query": "jaundice (11).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 1.0,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (35).jpg",
+        "label": 1,
+        "sim": 0.745
+      },
+      {
+        "path": "jaundice (24).jpg",
+        "label": 1,
+        "sim": 0.744
+      },
+      {
+        "path": "jaundice (153).jpg",
+        "label": 1,
+        "sim": 0.738
+      },
+      {
+        "path": "jaundice (116).jpg",
+        "label": 1,
+        "sim": 0.729
+      },
+      {
+        "path": "jaundice (39).jpg",
+        "label": 1,
+        "sim": 0.724
+      }
+    ]
+  },
+  {
+    "query": "jaundice (120).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.982,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (122).jpg",
+        "label": 1,
+        "sim": 0.724
+      },
+      {
+        "path": "jaundice (118).jpg",
+        "label": 1,
+        "sim": 0.711
+      },
+      {
+        "path": "jaundice (123).jpg",
+        "label": 1,
+        "sim": 0.687
+      },
+      {
+        "path": "jaundice (84).jpg",
+        "label": 1,
+        "sim": 0.671
+      },
+      {
+        "path": "jaundice (68).jpg",
+        "label": 1,
+        "sim": 0.67
+      }
+    ]
+  },
+  {
+    "query": "jaundice (135).jpg",
+    "true_label": 1,
+    "retrieval_prob": 0.89,
+    "classifier_prob": 0.808,
+    "uncertainty": 0.347,
+    "neighbors": [
+      {
+        "path": "jaundice (136).jpg",
+        "label": 1,
+        "sim": 0.735
+      },
+      {
+        "path": "jaundice (90).jpg",
+        "label": 1,
+        "sim": 0.628
+      },
+      {
+        "path": "jaundice (134).jpg",
+        "label": 1,
+        "sim": 0.625
+      },
+      {
+        "path": "jaundice (25).jpg",
+        "label": 1,
+        "sim": 0.594
+      },
+      {
+        "path": "normal (747).jpg",
+        "label": 0,
+        "sim": 0.592
+      }
+    ]
+  },
+  {
+    "query": "jaundice (138).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.999,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (139).jpg",
+        "label": 1,
+        "sim": 0.789
+      },
+      {
+        "path": "jaundice (142).jpg",
+        "label": 1,
+        "sim": 0.787
+      },
+      {
+        "path": "jaundice (137).jpg",
+        "label": 1,
+        "sim": 0.743
+      },
+      {
+        "path": "jaundice (31).jpg",
+        "label": 1,
+        "sim": 0.693
+      },
+      {
+        "path": "jaundice (88).jpg",
+        "label": 1,
+        "sim": 0.689
+      }
+    ]
+  },
+  {
+    "query": "jaundice (143).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 1.0,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (144).jpg",
+        "label": 1,
+        "sim": 0.88
+      },
+      {
+        "path": "jaundice (166).jpg",
+        "label": 1,
+        "sim": 0.817
+      },
+      {
+        "path": "jaundice (75).jpg",
+        "label": 1,
+        "sim": 0.777
+      },
+      {
+        "path": "jaundice (108).jpg",
+        "label": 1,
+        "sim": 0.777
+      },
+      {
+        "path": "jaundice (67).jpg",
+        "label": 1,
+        "sim": 0.776
+      }
+    ]
+  },
+  {
+    "query": "jaundice (156).jpg",
+    "true_label": 1,
+    "retrieval_prob": 0.0,
+    "classifier_prob": 0.453,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "normal (1075).jpg",
+        "label": 0,
+        "sim": 0.591
+      },
+      {
+        "path": "normal (1078).jpg",
+        "label": 0,
+        "sim": 0.569
+      },
+      {
+        "path": "normal (597).jpg",
+        "label": 0,
+        "sim": 0.562
+      },
+      {
+        "path": "normal (901).jpg",
+        "label": 0,
+        "sim": 0.559
+      },
+      {
+        "path": "normal (1068).jpg",
+        "label": 0,
+        "sim": 0.554
+      }
+    ]
+  },
+  {
+    "query": "jaundice (158).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 1.0,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (172).jpg",
+        "label": 1,
+        "sim": 0.735
+      },
+      {
+        "path": "jaundice (72).jpg",
+        "label": 1,
+        "sim": 0.728
+      },
+      {
+        "path": "jaundice (116).jpg",
+        "label": 1,
+        "sim": 0.717
+      },
+      {
+        "path": "jaundice (35).jpg",
+        "label": 1,
+        "sim": 0.704
+      },
+      {
+        "path": "jaundice (77).jpg",
+        "label": 1,
+        "sim": 0.696
+      }
+    ]
+  },
+  {
+    "query": "jaundice (16).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.975,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (19).jpg",
+        "label": 1,
+        "sim": 0.82
+      },
+      {
+        "path": "jaundice (69).jpg",
+        "label": 1,
+        "sim": 0.665
+      },
+      {
+        "path": "jaundice (74).jpg",
+        "label": 1,
+        "sim": 0.665
+      },
+      {
+        "path": "jaundice (70).jpg",
+        "label": 1,
+        "sim": 0.657
+      },
+      {
+        "path": "jaundice (134).jpg",
+        "label": 1,
+        "sim": 0.637
+      }
+    ]
+  },
+  {
+    "query": "jaundice (17).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.995,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (70).jpg",
+        "label": 1,
+        "sim": 0.716
+      },
+      {
+        "path": "jaundice (108).jpg",
+        "label": 1,
+        "sim": 0.688
+      },
+      {
+        "path": "jaundice (74).jpg",
+        "label": 1,
+        "sim": 0.665
+      },
+      {
+        "path": "jaundice (101).jpg",
+        "label": 1,
+        "sim": 0.663
+      },
+      {
+        "path": "jaundice (19).jpg",
+        "label": 1,
+        "sim": 0.662
+      }
+    ]
+  },
+  {
+    "query": "jaundice (189).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.998,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (183).jpg",
+        "label": 1,
+        "sim": 1.0
+      },
+      {
+        "path": "jaundice (184).jpg",
+        "label": 1,
+        "sim": 0.812
+      },
+      {
+        "path": "jaundice (188).jpg",
+        "label": 1,
+        "sim": 0.812
+      },
+      {
+        "path": "jaundice (185).jpg",
+        "label": 1,
+        "sim": 0.75
+      },
+      {
+        "path": "jaundice (187).jpg",
+        "label": 1,
+        "sim": 0.75
+      }
+    ]
+  },
+  {
+    "query": "jaundice (199).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.997,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (200).jpg",
+        "label": 1,
+        "sim": 0.829
+      },
+      {
+        "path": "jaundice (91).jpg",
+        "label": 1,
+        "sim": 0.685
+      },
+      {
+        "path": "jaundice (198).jpg",
+        "label": 1,
+        "sim": 0.683
+      },
+      {
+        "path": "jaundice (62).jpg",
+        "label": 1,
+        "sim": 0.638
+      },
+      {
+        "path": "jaundice (139).jpg",
+        "label": 1,
+        "sim": 0.633
+      }
+    ]
+  },
+  {
+    "query": "jaundice (2).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.847,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (13).jpg",
+        "label": 1,
+        "sim": 0.683
+      },
+      {
+        "path": "jaundice (78).jpg",
+        "label": 1,
+        "sim": 0.648
+      },
+      {
+        "path": "jaundice (166).jpg",
+        "label": 1,
+        "sim": 0.645
+      },
+      {
+        "path": "jaundice (67).jpg",
+        "label": 1,
+        "sim": 0.642
+      },
+      {
+        "path": "jaundice (74).jpg",
+        "label": 1,
+        "sim": 0.635
+      }
+    ]
+  },
+  {
+    "query": "jaundice (27).jpg",
+    "true_label": 1,
+    "retrieval_prob": 0.574,
+    "classifier_prob": 0.884,
+    "uncertainty": 0.682,
+    "neighbors": [
+      {
+        "path": "normal (952).jpg",
+        "label": 0,
+        "sim": 0.603
+      },
+      {
+        "path": "jaundice (174).jpg",
+        "label": 1,
+        "sim": 0.591
+      },
+      {
+        "path": "normal (861).jpg",
+        "label": 0,
+        "sim": 0.591
+      },
+      {
+        "path": "jaundice (183).jpg",
+        "label": 1,
+        "sim": 0.588
+      },
+      {
+        "path": "jaundice (55).jpg",
+        "label": 1,
+        "sim": 0.579
+      }
+    ]
+  },
+  {
+    "query": "jaundice (33).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 1.0,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (32).jpg",
+        "label": 1,
+        "sim": 0.753
+      },
+      {
+        "path": "jaundice (144).jpg",
+        "label": 1,
+        "sim": 0.75
+      },
+      {
+        "path": "jaundice (75).jpg",
+        "label": 1,
+        "sim": 0.736
+      },
+      {
+        "path": "jaundice (166).jpg",
+        "label": 1,
+        "sim": 0.716
+      },
+      {
+        "path": "jaundice (52).jpg",
+        "label": 1,
+        "sim": 0.713
+      }
+    ]
+  },
+  {
+    "query": "jaundice (41).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.971,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (115).jpg",
+        "label": 1,
+        "sim": 0.649
+      },
+      {
+        "path": "jaundice (22).jpg",
+        "label": 1,
+        "sim": 0.643
+      },
+      {
+        "path": "jaundice (62).jpg",
+        "label": 1,
+        "sim": 0.64
+      },
+      {
+        "path": "jaundice (63).jpg",
+        "label": 1,
+        "sim": 0.621
+      },
+      {
+        "path": "jaundice (172).jpg",
+        "label": 1,
+        "sim": 0.614
+      }
+    ]
+  },
+  {
+    "query": "jaundice (45).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 0.977,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (43).jpg",
+        "label": 1,
+        "sim": 0.766
+      },
+      {
+        "path": "jaundice (42).jpg",
+        "label": 1,
+        "sim": 0.762
+      },
+      {
+        "path": "jaundice (190).jpg",
+        "label": 1,
+        "sim": 0.699
+      },
+      {
+        "path": "jaundice (133).jpg",
+        "label": 1,
+        "sim": 0.673
+      },
+      {
+        "path": "jaundice (163).jpg",
+        "label": 1,
+        "sim": 0.648
+      }
+    ]
+  },
+  {
+    "query": "jaundice (47).jpg",
+    "true_label": 1,
+    "retrieval_prob": 1.0,
+    "classifier_prob": 1.0,
+    "uncertainty": 0.0,
+    "neighbors": [
+      {
+        "path": "jaundice (48).jpg",
+        "label": 1,
+        "sim": 0.845
+      },
+      {
+        "path": "jaundice (108).jpg",
+        "label": 1,
+        "sim": 0.802
+      },
+      {
+        "path": "jaundice (74).jpg",
+        "label": 1,
+        "sim": 0.799
+      },
+      {
+        "path": "jaundice (70).jpg",
+        "label": 1,
+        "sim": 0.773
+      },
+      {
+        "path": "jaundice (101).jpg",
+        "label": 1,
+        "sim": 0.754
+      }
+    ]
+  }
+]

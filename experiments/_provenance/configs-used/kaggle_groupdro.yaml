@@ -1,0 +1,8 @@
+# Kaggle overlay for the GroupDRO baseline (see configs/groupdro.yaml). Dataset path only differs from local.
+defaults: groupdro.yaml
+data:
+  neo_skin_core: /kaggle/input/jaundicedataset3/jaundicedataset3
+train:
+  num_workers: 8
+  batch_size: 32
+  amp: true

@@ -1,0 +1,14 @@
+# Smoke test: verify code end-to-end LOCALLY before shipping to Cloud/HPC. Never a real run.
+defaults: base.yaml
+seed: 0
+data:
+  image_size: 64
+train:
+  device: cpu
+  epochs: 1
+  batch_size: 4
+  num_workers: 0
+  amp: false
+smoke:
+  max_per_class: 8     # tiny subset
+  max_steps: 2         # 2 optimizer steps, then stop
