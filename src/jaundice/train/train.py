@@ -143,6 +143,15 @@ def run(cfg: dict, tag: str = "run") -> dict:
             break
 
     # --- final test evaluation: threshold-free + val-tuned operating points + fairness ---
+    # Evaluate the SAVED best-by-val checkpoint, not the final-epoch model left in memory — with
+    # early stopping the two differ, and best.pt is what gets deployed. (Prior behaviour evaluated
+    # the final-epoch model, so metrics.json did not describe the saved checkpoint.)
+    best_ckpt = outdir / "best.pt"
+    if best_ckpt.exists():
+        # weights_only=True: we only need the tensor state_dict, and it's our own just-saved file.
+        state = torch.load(best_ckpt, map_location=dev, weights_only=True)["model"]
+        model.load_state_dict(state, strict=False)
+        model.eval()
     thr_cfg = t.get("threshold", {}) or {}
     y_val, p_val = collect(model, loaders["val"], dev)
     t_youden = pick_threshold(y_val, p_val, "youden") if len(y_val) else 0.5

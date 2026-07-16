@@ -1,0 +1,9 @@
+# ATTRIBUTION run B — everything ON except SCIN (BiliGrad + causal + mixstyle, white-balance OFF).
+# Purpose: isolate the non-white-balance contribution to invariance. Compare cf pred_swing to
+# ours_bg (all on) and attr_scin_only (WB only):
+#   if this retains most of the illuminant/melanin invariance without SCIN -> BiliGrad's spatial
+#   readout is carrying real invariance beyond white balance (the result worth publishing).
+#   if invariance collapses without SCIN -> the physics head depends on WB to work.
+defaults: bili_grad.yaml   # SCIN + BiliGrad + causal + mixstyle
+model:
+  scin: false

@@ -1,0 +1,15 @@
+# ATTRIBUTION run A — SCIN white-balance ONLY, no BiliGrad/causal/mixstyle.
+# Purpose: isolate how much of ours_bg's counterfactual invariance is just white balance.
+# Compare its cf pred_swing to ours_bg (all on) and ERM (all off):
+#   if this already matches ours_bg's 5.5x illuminant invariance -> WB explains it, BiliGrad adds
+#   nothing to invariance; the interesting axis is then the MELANIN swing (BiliGrad's actual claim).
+defaults: dinov2.yaml
+model:
+  scin: true
+  bili_axis: false
+  disentangle: {enable: false}
+  bili_grad: {enable: false}
+  mixstyle: {enable: false}
+  causal: {illuminant_adv: false, melanin_adv: false, lambda_adv: 0.0}
+train:
+  dg: {method: erm}
