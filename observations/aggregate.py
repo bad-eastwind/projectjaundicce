@@ -75,9 +75,13 @@ def flatten(run: str) -> dict:
     fair = m.get("test_fairness", {})
     out["fair.bacc_gap"] = fair.get("bacc_gap")
     out["fair.sensitivity_gap"] = fair.get("sensitivity_gap")
+    out["fair.min_required_n"] = fair.get("min_stratum_n")
+    out["fair.n_evaluable"] = fair.get("n_evaluable")
+    out["fair.n_missing_ita"] = fair.get("n_missing_ita")
+    out["fair.n_excluded_strata"] = len(fair.get("excluded_strata", {}))
 
     ps = fair.get("per_stratum", {})
-    out["fair.n_strata"] = len(ps)
+    out["fair.n_strata"] = len(ps)  # eligible/reportable strata only for new metrics.json files
     ns = [v["n"] for v in ps.values()]
     out["fair.min_stratum_n"] = min(ns) if ns else np.nan
     out["fair.max_stratum_n"] = max(ns) if ns else np.nan
@@ -111,9 +115,17 @@ def strata_long(keys: pd.DataFrame) -> pd.DataFrame:
             rows.append(
                 dict(
                     run=r.run, group=r.group, method=r.method, split=r.split, seed=r.seed,
-                    stratum=name, n=v["n"], pos=v["pos"],
+                    stratum=name, eligible=True, n=v["n"], pos=v["pos"],
                     balanced_acc=v["balanced_acc"], sensitivity=v["sensitivity"],
                     specificity=v["specificity"], auc=v["auc"],
+                )
+            )
+        for name, v in m.get("test_fairness", {}).get("excluded_strata", {}).items():
+            rows.append(
+                dict(
+                    run=r.run, group=r.group, method=r.method, split=r.split, seed=r.seed,
+                    stratum=name, eligible=False, n=v["n"], pos=v["pos"],
+                    balanced_acc=np.nan, sensitivity=np.nan, specificity=np.nan, auc=np.nan,
                 )
             )
     return pd.DataFrame(rows)

@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 from sklearn.metrics import balanced_accuracy_score, roc_auc_score, f1_score, confusion_matrix
 
+from jaundice.data.skin_tone import ITA_NAMES, ita_stratum
+
 
 def classification_metrics(y_true, prob_pos, thresh: float = 0.5) -> dict:
     y = np.asarray(y_true).astype(int)
@@ -54,36 +56,32 @@ def pick_threshold(y_true, prob_pos, mode: str = "youden",
     return chosen if (mode == "target_sens" and chosen is not None) else best_t
 
 
-# ITA (Individual Typology Angle) skin-tone strata, dermatology convention (light -> dark).
-ITA_EDGES = [55.0, 41.0, 28.0, 10.0, -30.0]
-ITA_NAMES = ["very_light", "light", "intermediate", "tan", "brown", "dark"]
-
-
-def ita_stratum(ita: float) -> str:
-    for name, edge in zip(ITA_NAMES, ITA_EDGES):
-        if ita > edge:
-            return name
-    return ITA_NAMES[-1]
-
-
-def fairness_report(y_true, prob_pos, ita, thresh: float = 0.5) -> dict:
+def fairness_report(y_true, prob_pos, ita, thresh: float = 0.5, min_n: int = 20) -> dict:
     """Per-skin-tone-stratum metrics + worst-group gaps. `ita` = per-sample Individual Typology Angle.
-    Substantiates the skin-tone-fairness claim (otherwise unmeasured)."""
+    Only strata with at least `min_n` evaluable images contribute to gap metrics."""
     y = np.asarray(y_true).astype(int)
     p = np.asarray(prob_pos, dtype=float)
     ita = np.asarray(ita, dtype=float)
+    finite = np.isfinite(ita)
+    y, p, ita = y[finite], p[finite], ita[finite]
     strata = np.array([ita_stratum(v) for v in ita])
-    per = {}
+    per, excluded = {}, {}
     for name in ITA_NAMES:
         m = strata == name
         n = int(m.sum())
         if n == 0:
             continue
+        pos = int(y[m].sum())
+        if n < min_n:
+            excluded[name] = {"n": n, "pos": pos, "reason": f"n<{min_n}"}
+            continue
         s = classification_metrics(y[m], p[m], thresh)
-        per[name] = {"n": n, "pos": int(y[m].sum()), **{k: s[k] for k in
+        per[name] = {"n": n, "pos": pos, **{k: s[k] for k in
                      ("balanced_acc", "sensitivity", "specificity", "auc")}}
     def gap(key):
         vals = [v[key] for v in per.values() if v.get(key) == v.get(key)]  # drop nan
         return float(max(vals) - min(vals)) if len(vals) >= 2 else float("nan")
-    return {"per_stratum": per, "bacc_gap": gap("balanced_acc"),
+    return {"per_stratum": per, "excluded_strata": excluded,
+            "min_stratum_n": int(min_n), "n_evaluable": int(finite.sum()),
+            "n_missing_ita": int((~finite).sum()), "bacc_gap": gap("balanced_acc"),
             "sensitivity_gap": gap("sensitivity")}

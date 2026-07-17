@@ -5,6 +5,7 @@ illuminant in linear-ish color space; ImageNet normalization happens INSIDE the 
 """
 from __future__ import annotations
 import csv, collections
+import math
 from PIL import Image
 import torch
 from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler
@@ -21,6 +22,8 @@ def read_manifest(path: str, dataset_id: str = "neo_skin_core") -> list[dict]:
                 continue
             r["label"] = int(r["label"])
             r["domain"] = int(r.get("domain", 0) or 0)
+            r["ref_ita"] = float(r["ref_ita"]) if r.get("ref_ita") else math.nan
+            r["ref_skin_pixels"] = int(r["ref_skin_pixels"]) if r.get("ref_skin_pixels") else 0
             rows.append(r)
     return rows
 
@@ -52,7 +55,8 @@ class JaundiceDataset(Dataset):
     def __getitem__(self, i):
         r = self.rows[i]
         img = Image.open(r["path"]).convert("RGB")
-        return {"image": self.tf(img), "label": r["label"], "domain": r["domain"], "path": r["path"]}
+        return {"image": self.tf(img), "label": r["label"], "domain": r["domain"],
+                "ref_ita": torch.tensor(r["ref_ita"], dtype=torch.float32), "path": r["path"]}
 
 
 def _cap_per_class(rows, cap):

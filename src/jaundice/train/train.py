@@ -9,13 +9,11 @@ import argparse, json, time
 from pathlib import Path
 import numpy as np
 import torch
-import torch.nn.functional as F
 from torch import nn, optim
 
 from jaundice.utils import load_config, seed_everything, pick_device
 from jaundice.data.dataset import build_loaders
 from jaundice.models.net import JaundiceNet
-from jaundice.models.causal import compute_ita
 from jaundice.train.metrics import (classification_metrics, pick_threshold, fairness_report)
 from jaundice.train.losses import aux_losses
 from jaundice.train.dg import DGObjective
@@ -23,19 +21,18 @@ from jaundice.train.dg import DGObjective
 
 @torch.no_grad()
 def collect(model, loader, dev, want_ita: bool = False):
-    """Returns (y, prob_pos[, ita]) over a loader. ITA (skin-tone angle) is measured on the SCIN
-    white-balanced image over the model's own skin-attention, for the fairness stratification."""
+    """Returns (y, prob_pos[, ita]) over a loader.
+
+    ITA is the frozen model-independent manifest reference, not a value derived
+    from this model's SCIN output or attention map.
+    """
     model.eval()
     ys, ps, itas = [], [], []
     for b in loader:
         x = b["image"].to(dev)
+        logits = model(x)
         if want_ita:
-            logits, aux = model(x, return_aux=True)
-            attn_up = F.interpolate(aux["attn"].unsqueeze(1), size=x.shape[-2:],
-                                    mode="bilinear", align_corners=False).squeeze(1)
-            itas.append(compute_ita(aux["x_wb"], attn_up).squeeze(1).float().cpu().numpy())
-        else:
-            logits = model(x)
+            itas.append(b["ref_ita"].float().cpu().numpy())
         ps.append(torch.softmax(logits, 1)[:, 1].float().cpu().numpy())
         ys.append(b["label"].numpy())
     if not ys:
@@ -162,7 +159,10 @@ def run(cfg: dict, tag: str = "run") -> dict:
     tm = classification_metrics(y_test, p_test, 0.5) if len(y_test) else {}
     tm_youden = classification_metrics(y_test, p_test, t_youden) if len(y_test) else {}
     tm_screen = classification_metrics(y_test, p_test, t_screen) if len(y_test) else {}
-    fairness = fairness_report(y_test, p_test, ita_test, t_youden) if len(y_test) else {}
+    eval_cfg = cfg.get("eval", {}) or {}
+    min_stratum_n = int(eval_cfg.get("fairness_min_stratum_n", 20))
+    fairness = (fairness_report(y_test, p_test, ita_test, t_youden, min_n=min_stratum_n)
+                if len(y_test) and eval_cfg.get("skin_tone_strata", True) else {})
 
     json.dump({"tag": tag, "history": hist, "best_val_score": best,
                "test": tm, "test_youden": tm_youden, "test_screening": tm_screen,

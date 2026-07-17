@@ -1,6 +1,7 @@
 """Build a unified manifest (manifest.csv) across all jaundice datasets.
 
-Columns: dataset_id, modality, population, label, label_name, orig_split, split, path
+Columns: dataset_id, modality, population, label, label_name, orig_split, split, path,
+         ref_ita, ref_ita_stratum, ref_skin_pixels, ref_skin_fraction
 
 - neo_skin_core (dataset3==dataset4): neonatal SKIN. We assign a deterministic stratified
   train/val/test split (hash of filename -> stable bucket, done per-class).
@@ -20,6 +21,7 @@ from collections import Counter
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # allow direct execution
 from jaundice.utils import load_config, stable_bucket
+from jaundice.data.skin_tone import reference_skin_tone
 
 IMG_EXT = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
@@ -54,6 +56,9 @@ def _assign_split(rel_key: str, ratios: dict) -> str:
 
 def build(cfg: dict) -> list[dict]:
     d = cfg["data"]
+    ref_cfg = cfg.get("eval", {}).get("skin_tone_reference", {}) or {}
+    ref_size = int(ref_cfg.get("image_size", 128))
+    ref_min_skin = int(ref_cfg.get("min_skin_pixels", 20))
     ratios = d["split"]
     rows: list[dict] = []
 
@@ -68,9 +73,14 @@ def build(cfg: dict) -> list[dict]:
             for img in _iter_images(cls_dir):
                 # stratify: bucket per-class so each class hits the target ratios
                 split = _assign_split(f"{label_name}/{img.name}", ratios)
+                ref = reference_skin_tone(img, size=ref_size, min_skin_pixels=ref_min_skin)
                 rows.append(dict(dataset_id="neo_skin_core", modality="skin",
                                  population="neonate", label=label, label_name=label_name,
-                                 orig_split="", split=split, path=str(img)))
+                                 orig_split="", split=split, path=str(img),
+                                 ref_ita=f"{ref.ita:.6f}",
+                                 ref_ita_stratum=ref.stratum,
+                                 ref_skin_pixels=ref.skin_pixels,
+                                 ref_skin_fraction=f"{ref.skin_fraction:.6f}"))
     else:
         print(f"[warn] core root missing: {core_root}", file=sys.stderr)
 
@@ -94,7 +104,9 @@ def build(cfg: dict) -> list[dict]:
                 for img in _iter_images(cls_dir):
                     rows.append(dict(dataset_id=ds_id, modality="sclera",
                                      population="adult", label=label, label_name=label_name,
-                                     orig_split=orig, split=orig, path=str(img)))
+                                     orig_split=orig, split=orig, path=str(img),
+                                     ref_ita="", ref_ita_stratum="",
+                                     ref_skin_pixels="", ref_skin_fraction=""))
     return rows
 
 
@@ -124,7 +136,8 @@ def main():
     rows = build(cfg)
     out = Path(args.out or cfg["data"]["manifest_out"])
     out.parent.mkdir(parents=True, exist_ok=True)
-    fields = ["dataset_id", "modality", "population", "label", "label_name", "orig_split", "split", "path"]
+    fields = ["dataset_id", "modality", "population", "label", "label_name", "orig_split", "split",
+              "path", "ref_ita", "ref_ita_stratum", "ref_skin_pixels", "ref_skin_fraction"]
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=fields); w.writeheader(); w.writerows(rows)
     print(f"wrote {out} ({len(rows)} rows)")

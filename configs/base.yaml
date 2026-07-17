@@ -49,3 +49,7 @@ model:
 eval:
   cross_domain: true
   skin_tone_strata: true    # ITA proxy fairness
+  fairness_min_stratum_n: 20
+  # Frozen, model-independent protected-attribute proxy: fixed resize + gray-world WB +
+  # fixed RGB/YCbCr skin mask, written to manifest.csv and reused by every model.
+  skin_tone_reference: {image_size: 128, min_skin_pixels: 20}
